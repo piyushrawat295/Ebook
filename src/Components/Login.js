@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [credentials, setCredentials] = useState({ email: "", password: "" });
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,7 +22,15 @@ const Login = () => {
             }
 
             const data = await response.json();
-            console.log(data);
+            console.log('Login successful:', data);
+
+            // Redirect to a different page after successful login
+            if (data.success) {
+                localStorage.setItem('token', data.authtoken);
+                navigate('/');
+            } else {
+                alert("Invalid credentials");
+            }
         } catch (error) {
             console.error('Error logging in:', error.message);
         }
@@ -69,7 +79,6 @@ const Login = () => {
                 </form>
             </div>
         </div>
-
     );
 }
 

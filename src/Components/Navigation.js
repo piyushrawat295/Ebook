@@ -1,9 +1,16 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 
 const Navigation = () => {
     let location = useLocation();
+    const navigate = useNavigate();
+
+    const handlelogout=()=>{
+        localStorage.removeItem('token');
+        navigate('/login')
+
+    }
 
     React.useEffect(() => {
         console.log(location.pathname);
@@ -24,10 +31,10 @@ const Navigation = () => {
                             <Link className={`nav-link ${location.pathname === "/AboutUS" ? "active" : ""}`} to="/AboutUS">AboutUS</Link>
                         </li>
                     </ul>
-                    <form className="d-flex" role="search">
-                        <Link className="btn btn-primary mx-1" to="/login" role="button">Login</Link>
-                        <Link className="btn btn-primary mx-1" to="/signup" role="button">SignUp</Link>
-                    </form>
+                    {!localStorage.getItem('token')?<form className="d-flex" role="search">
+                        <Link className="button-74" to="/login" role="button">Login</Link>
+                        <Link className="button-74" to="/signup" role="button">SignUp</Link>
+                    </form> : <button onClick={handlelogout} type="button" className="button-74">LogOut</button> }
                 </div>
             </div>
         </nav>

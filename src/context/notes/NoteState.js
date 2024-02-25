@@ -1,86 +1,97 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NoteContext from "./noteContext";
 
 const NoteState = ({ children }) => {
-  const host = "http://localhost:5000"
-  const notesInitial = [];
-  const[notes, setNotes] = useState(notesInitial);
+  const host = "http://localhost:5000";
+  const [notes, setNotes] = useState([]);
 
+  useEffect(() => {
+    getNote();
+    // eslint-disable-next-line
+  }, []);
 
-  const getNote = async()=>{
-    const response = await fetch(`${host}/api/notes/fetchallnotes`,{
-      method:'GET',
-      headers:{
-        'Content-Type':'application/json',
-        "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjVkMDZkYjU2MGI5MTY4ZWM0Yjc0MmEzIn0sImlhdCI6MTcwODE1ODM4OX0.CJe4WVJ6AJui6BOu1qRTDhStIxmQO2ix777my5AuBbc"
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
+
+  const getNote = async () => {
+    try {
+      const response = await fetch(`${host}/api/notes/fetchallnotes`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          "auth-token": getToken()
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch notes');
       }
-    });
-    const json = await response.json()
-    setNotes(json)
-  }
-
-
-  const addNote = async(title, description, tag)=>{
-    const response = await fetch(`${host}/api/notes/addnote`,{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjVkMDZkYjU2MGI5MTY4ZWM0Yjc0MmEzIn0sImlhdCI6MTcwODE1ODM4OX0.CJe4WVJ6AJui6BOu1qRTDhStIxmQO2ix777my5AuBbc"
-      },
-      body: JSON.stringify({title, description, tag})
-    });
-    console.log("Adding new note")
-    const note = await response.json();
-    setNotes(notes.concat(note))
-  }
-
-  const deleteNote = async(id) =>{
-    const response = await fetch(`${host}/api/notes/delete/${id}`,{
-      method:'DELETE',
-      headers:{
-        'Content-Type':'application/json',
-        "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjVkMDZkYjU2MGI5MTY4ZWM0Yjc0MmEzIn0sImlhdCI6MTcwODE1ODM4OX0.CJe4WVJ6AJui6BOu1qRTDhStIxmQO2ix777my5AuBbc"
-      },
-      
-    });
-    const json = response.json();
-    
-
-
-    console.log("Deleting the note with id "+id);
-    const newNotes = notes.filter((note)=>
-    {return note._id!==id}
-    )
-    setNotes(newNotes)
-  }
-
-  const editNote = async(id, title, description, tag)=>{
-    const response = await fetch(`${host}/api/notes/update/${id}`,{
-      method:'PUT',
-      headers:{
-        'Content-Type':'application/json',
-        "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjVkMDZkYjU2MGI5MTY4ZWM0Yjc0MmEzIn0sImlhdCI6MTcwODE1ODM4OX0.CJe4WVJ6AJui6BOu1qRTDhStIxmQO2ix777my5AuBbc"
-      },
-      body: JSON.stringify({title, description, tag})
-    });
-    const json = await response.json();
-    
-
-    let newNotes = JSON.parse(JSON.stringify(notes))
-    for (let index = 0; index < notes.length; index++) {
-      const element = notes[index];
-      if(element._id === id){
-        newNotes[index].title = title;
-        newNotes[index].description = description;
-        newNotes[index].tag = tag;
-        break;
-      }
-      
+      const json = await response.json();
+      setNotes(json);
+    } catch (error) {
+      console.error('Error fetching notes:', error.message);
     }
-    setNotes(newNotes);
-  }
+  };
 
+  const addNote = async (title, description, tag) => {
+    try {
+      const response = await fetch(`${host}/api/notes/addnote`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "auth-token": getToken()
+        },
+        body: JSON.stringify({ title, description, tag })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add note');
+      }
+      console.log("Adding new note");
+      const note = await response.json();
+      setNotes([...notes, note]);
+    } catch (error) {
+      console.error('Error adding note:', error.message);
+    }
+  };
 
+  const deleteNote = async (id) => {
+    try {
+      const response = await fetch(`${host}/api/notes/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          "auth-token": getToken()
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete note');
+      }
+      console.log("Deleting the note with id " + id);
+      setNotes(notes.filter(note => note._id !== id));
+    } catch (error) {
+      console.error('Error deleting note:', error.message);
+    }
+  };
+
+  const editNote = async (id, title, description, tag) => {
+    try {
+      const response = await fetch(`${host}/api/notes/update/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          "auth-token": getToken()
+        },
+        body: JSON.stringify({ title, description, tag })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to edit note');
+      }
+      console.log("Editing the note with id " + id);
+      setNotes(notes.map(note => note._id === id ? { ...note, title, description, tag } : note));
+    } catch (error) {
+      console.error('Error editing note:', error.message);
+    }
+  };
 
   return (
     <NoteContext.Provider value={{ notes, addNote, deleteNote, editNote, getNote }}>

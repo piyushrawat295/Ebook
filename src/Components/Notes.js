@@ -2,41 +2,47 @@ import React, { useEffect, useRef, useState } from 'react';
 import NoteContext from '../context/notes/noteContext';
 import Noteitem from './Noteitem';
 import Addnote from './Addnote';
+import { useNavigate } from 'react-router-dom';
+import Empty from './Empty';
 
 const Notes = () => {
   const context = React.useContext(NoteContext);
+  const navigate = useNavigate();
   const { notes, getNote, editNote } = context;
 
   useEffect(() => {
-    return () => {
-      getNote()
-      // eslint-disable-next-line
-    };
-  }, []);
+    const token = localStorage.getItem('token');
+    if (token) {
+      getNote();
+    } else {
+      navigate("/login");
+    }
+  }, [navigate, getNote]);
+
 
   const ref = useRef(null);
   const refClose = useRef(null);
 
   const [note, setNote] = useState({ etitle: "", edescription: "", etag: "default" })
 
-    const handleClick = (e) => {
-      console.log("updating the note..", note)
-      editNote(note.id, note.etitle, note.edescription, note.etag)
-      refClose.current.click();
+  const handleClick = (e) => {
+    console.log("updating the note..", note)
+    editNote(note.id, note.etitle, note.edescription, note.etag)
+    refClose.current.click();
 
-    }
-    const onChange = (e) => {
-        setNote({ ...note, [e.target.name]: e.target.value })
-    }
+  }
+  const onChange = (e) => {
+    setNote({ ...note, [e.target.name]: e.target.value })
+  }
 
-    const updateNote = (currentNote) => {
-      ref.current.click();
-      setNote({
-          id: currentNote._id,
-          etitle: currentNote.title,
-          edescription: currentNote.description,
-          etag: currentNote.tag
-      });
+  const updateNote = (currentNote) => {
+    ref.current.click();
+    setNote({
+      id: currentNote._id,
+      etitle: currentNote.title,
+      edescription: currentNote.description,
+      etag: currentNote.tag
+    });
   }
 
   return (
@@ -56,30 +62,31 @@ const Notes = () => {
             <div className="modal-body">
               <form className="form my-3">
                 <div className="mb-3 input-container">
-                  
+
                   <input type="text" className="inputmodal" id="etitle" name="etitle" value={note.etitle} placeholder="TITLE" minLength={5} required onChange={onChange} />
                 </div>
-                <div className="mb-3">                 
+                <div className="mb-3">
                   <textarea className="inputmodal" id="edescription" name="edescription" value={note.edescription} placeholder="DESCRIPTION" minLength={5} required onChange={onChange} rows="5"></textarea>
                 </div>
-                <div className="mb-3 input-container">                 
+                <div className="mb-3 input-container">
                   <input type="text" className="inputmodal" id="etag" name="etag" value={note.etag} placeholder="TAG" onChange={onChange} />
-                </div>          
+                </div>
               </form>
 
             </div>
             <div className="modal-footer">
               <button ref={refClose} type="button" className="button-74" data-bs-dismiss="modal">Close</button>
-              <button disabled={note.etitle.length<5 || note.edescription.length<5} type="button" onClick={handleClick} className="button-74">Update Note</button>
+              <button disabled={note.etitle.length < 5 || note.edescription.length < 5} type="button" onClick={handleClick} className="button-74">Update Note</button>
             </div>
           </div>
         </div>
       </div>
-      <div className='row my-3'>
+      <div className='container row mx-2 my-3'>
+        {notes.length === 0 && <Empty/>}
         {notes.map((note) => {
-        
+
           return <Noteitem key={note._id} updateNote={updateNote} note={note} />
-          
+
         })}
       </div>
     </>

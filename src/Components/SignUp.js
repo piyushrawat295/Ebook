@@ -1,11 +1,10 @@
-import { useState } from "react";
-import React from 'react';
+import React, { useState } from "react";
 import '../App.css';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUp = () => {
-
   const [credentials, setCredentials] = useState({ name: "", email: "", password: "", cpassword: "" });
+  const navigate = useNavigate(); // Initialize navigate hook
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,16 +23,36 @@ const SignUp = () => {
         body: JSON.stringify({ name, email, password })
       });
 
-      // if (!response.ok) {
-      //     throw new Error('Failed to login');
+      // if (response.ok) {
+      //   // Redirect to dashboard after successful sign-up
+      //   navigate('/');
+      // } else {
+      //   // Handle error cases
+      //   const data = await response.json();
+      //   throw new Error(data.message);
       // }
+      if (!response.ok) {
+        throw new Error('Failed to Sign In');
+      }
 
-      const json = await response.json();
-      console.log(json);
+      const data = await response.json();
+      console.log('Signed In successful:', data);
+
+      // Redirect to a different page after successful login
+      if (data.success) {
+        localStorage.setItem('token', data.authtoken);
+        navigate('/');
+      } else {
+        alert("Invalid credentials");
+      }
+
     } catch (error) {
       console.error('Error Signing in:', error.message);
+      // Handle error cases, such as displaying an alert to the user
+      alert("Failed to sign up: " + error.message);
     }
   }
+
 
   const onChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -104,7 +123,6 @@ const SignUp = () => {
           </form>
         </div>
       </div>
-
     </div>
   );
 }

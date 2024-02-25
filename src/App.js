@@ -20,7 +20,6 @@ function App() {
             <Route exact path="/AboutUS" element={<AboutUS />} />
           </Routes>
         </BrowserRouter>
-
       </NoteState>
 
     </>
