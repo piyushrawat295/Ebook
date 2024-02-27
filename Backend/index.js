@@ -1,29 +1,36 @@
 const connectToMongo = require('./db');
-var cors = require('cors')
-
+const cors = require('cors');
+const express = require('express');
+const path = require('path');
 
 async function startServer() {
     try {
         await connectToMongo();
         console.log("Connected to MongoDB");
 
-        const express = require('express');
         const app = express();
         const port = 5000;
 
-        app.use(cors())
-        app.use(express.json())
+        // Enable CORS
+        app.use(cors());
 
+        // Parse JSON bodies
+        app.use(express.json());
 
-        app.use('/api/auths', require('./routes/auths'))
-        app.use('/api/notes', require('./routes/notes'))
+        // Serve React frontend
+        app.use(express.static(path.resolve(__dirname, 'Frontend', 'build')));
 
-        app.get('/', (req, res) => {
-            res.send('Hello World!');
+        // API routes
+        app.use('/api/auths', require('./routes/auths'));
+        app.use('/api/notes', require('./routes/notes'));
+
+        // Serve React app for any other route
+        app.get('*', (req, res) => {
+            res.sendFile(path.resolve(__dirname, 'Frontend', 'build', 'index.html'));
         });
 
         app.listen(port, () => {
-            console.log(`Example app listening on port ${port}`);
+            console.log(`Server is running on port ${port}`);
         });
     } catch (err) {
         console.error("Error connecting to MongoDB:", err);
