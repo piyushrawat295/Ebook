@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-// const mongoURI = "mongodb://127.0.0.1:27017/?directConnection=true";
-// const mongoURI = "mongodb+srv://Piyush295:20@07@2005Op@cluster0.3qfibbr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-const mongoURI = "mongodb://127.0.0.1:27017/ebook?directConnection=true";
+require('dotenv').config(); // Load environmental variables from .env file
+
+const mongoURI = process.env.MONGO_URI;
 
 const connectToMongo = async () => {
     try {
@@ -17,3 +17,4 @@ const connectToMongo = async () => {
 };
 
 module.exports = connectToMongo;
+
