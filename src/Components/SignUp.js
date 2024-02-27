@@ -15,7 +15,7 @@ const SignUp = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auths/newuser', {
+      const response = await fetch(`${window.location.origin}/api/auths/newuser`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
